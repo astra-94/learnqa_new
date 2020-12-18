@@ -24,8 +24,7 @@ public class CoreTestCase extends TestCase {
         super.setUp();
 
         DesiredCapabilities capabilities = this.getCapabilitiesByPlatformEnv();
-        String platform = System.getenv("PLATFORM");//не было
-        //домашка: сделать чтобы не только андроид драйвер мог передаваться так
+        String platform = System.getenv("PLATFORM");
 
         if(platform.equals(PLATFORM_ANDROID)) {
             driver = new AndroidDriver(new URL(AppiumUrl), capabilities);
@@ -35,7 +34,6 @@ public class CoreTestCase extends TestCase {
             throw new Exception("Cannot get run driver for platform from env variable. Platform value " + platform);
         }
 
-        //driver = new AndroidDriver(new URL(AppiumUrl), capabilities);
         this.rotateScreenPortait();
     }
 
