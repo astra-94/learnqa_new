@@ -1,20 +1,22 @@
 package lib.ui;
 
 import io.appium.java_client.AppiumDriver;
-import org.openqa.selenium.By;
 
-public class SearchPageObject extends MainPageObject{
 
-    private static final String
-    SEARCH_INIT_ELEMENT = "xpath://*[contains(@text,'Search Wikipedia')]",
-    SEARCH_INPUT = "xpath://*[contains(@text,'Search…')]",
-    SEARCH_CANCEL_BUTTON = "id:org.wikipedia:id/search_close_btn",
-    SEARCH_RESULT_BY_SUBSTRING_TPL = "xpath://*[@resource-id='org.wikipedia:id/page_list_item_container']//*[@text='{SUBSTRING}']",
+abstract public class SearchPageObject extends MainPageObject{
 
-    SEARCH_RESULT_BY_TITLE_TPL = "xpath://*[@resource-id='org.wikipedia:id/page_list_item_title'][@text='{TITLE}']",
-    SEARCH_RESULT_BY_INDEX_TPL = "xpath://*[@resource-id='org.wikipedia:id/page_list_item_container']//*[@index='{INDEX}']",
-    SEARCH_RESULT_ELEMENT = "xpath://*[@resource-id='org.wikipedia:id/search_results_list']/*[@resource-id='org.wikipedia:id/page_list_item_container']",
-    SEARCH_EMPTY_RESULT_ELEMENT = "xpath://*[@text='No results found']";
+    protected static String
+            SEARCH_INIT_ELEMENT,
+            SEARCH_INPUT,
+            CLEAR_MINI,
+            UNIVERSAL_TITLE,
+            SEARCH_CANCEL_BUTTON,
+            SEARCH_RESULT_BY_SUBSTRING_TPL,
+
+            SEARCH_RESULT_BY_TITLE_TPL,
+            SEARCH_RESULT_BY_INDEX_TPL,
+            SEARCH_RESULT_ELEMENT,
+            SEARCH_EMPTY_RESULT_ELEMENT;
 
     public SearchPageObject(AppiumDriver driver)
     {
@@ -32,6 +34,11 @@ public class SearchPageObject extends MainPageObject{
     {
         return SEARCH_RESULT_BY_TITLE_TPL.replace("{TITLE}", title);
     }
+
+    private static String getNameOfArticleTitle(String name_of_title)
+    {
+        return UNIVERSAL_TITLE.replace("{TITLE_OF_ARTICLE}", name_of_title);
+    }
     /* TEMPLATES METHODS */
 
     /* TEMPLATES METHODS */
@@ -44,7 +51,8 @@ public class SearchPageObject extends MainPageObject{
     public void initSearchInput()
     {
         this.waitForElementAndClick(SEARCH_INIT_ELEMENT, "Cannot find and click search init element", 5);
-        this.waitForElementPresent(SEARCH_INIT_ELEMENT, "Cannot find search input after clicking search init element");
+        //this.waitForElementPresent(SEARCH_INIT_ELEMENT, "Cannot find search input after clicking search init element");
+        //закомментила ради iOS
     }
 
     public void waitForCancelButtonToAppear()
@@ -91,12 +99,18 @@ public class SearchPageObject extends MainPageObject{
         this.waitForElementAndClick(search_result_xpath, "Cannot find and click search result with substring " + substring, 10);
     }
 
+
     public void clickByArticleWithTitle(String title)
     {
         String search_result_xpath = getResultSearchElementByTitle(title);
         this.waitForElementAndClick(search_result_xpath, "Cannot find and click search result with title " + title, 10);
     }
 
+    public void clickByArticleWithTitleUniversal(String name_of_title)
+    {
+        String UNIVERSAL_TITLE = getNameOfArticleTitle(name_of_title);
+        this.waitForElementAndClick(UNIVERSAL_TITLE, "Cannot find and click search result with title " + name_of_title, 10);
+    }
 
 
     public int getAmountOfFoundArticles()
@@ -122,6 +136,11 @@ public class SearchPageObject extends MainPageObject{
     public void assertThereIsNoResultOfSearch()
     {
         this.assertElementNotPresent(SEARCH_RESULT_ELEMENT, "We supposed not to find any results");
+    }
+
+    public void clearSearchField()
+    {
+        this.waitForElementAndClick(CLEAR_MINI, "Cannot clear search field", 5);
     }
 
 }

@@ -3,22 +3,26 @@ package lib.ui;
 import io.appium.java_client.AppiumDriver;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import lib.Platform;
 
 import java.util.List;
 
-public class ArticlePageObject extends MainPageObject
+abstract public class ArticlePageObject extends MainPageObject
 {
-    private static final String
-        TITLE = "id:org.wikipedia:id/view_page_title_text",
-        LOCATOR_TITLE = "xpath://*[@resource-id='org.wikipedia:id/view_page_title_text']",
-        FOOTER_ELEMENT = "xpath://*[@text='View page in browser']",
-        OPTIONS_BUTTON = "xpath://android.widget.ImageView[@content-desc='More options']",
-        OPTIONS_ADD_TO_MY_LIST_BUTTON = "xpath://*[@text='Add to reading list']",
-        ADD_TO_MY_LIST_OVERLAY = "id:org.wikipedia:id/onboarding_button",
-        MY_LIST_NAME_INPUT = "id:org.wikipedia:id/text_input",
-        MY_LIST_OK_BUTTON = "xpath://*[@text='OK']",
-        CLOSE_ARTICLE_BUTTON = "xpath://android.widget.ImageButton[@content-desc='Navigate up']",
-        CHOOSING_FOLDER_TPL = "xpath://*[@text='{NAME_OF_FOLDER}']";
+    protected static String
+        TITLE,
+
+        UNIVERSAL_TITLE,
+        LOCATOR_TITLE,
+        FOOTER_ELEMENT,
+        OPTIONS_BUTTON,
+        OPTIONS_ADD_TO_MY_LIST_BUTTON,
+        ADD_TO_MY_LIST_OVERLAY,
+        MY_LIST_NAME_INPUT,
+        MY_LIST_OK_BUTTON,
+        CLOSE_ARTICLE_BUTTON,
+        CHOOSING_FOLDER_TPL,
+        TITLE_FOR_APPIUM_ARTICLE;
 
     public ArticlePageObject(AppiumDriver driver)
     {
@@ -28,6 +32,11 @@ public class ArticlePageObject extends MainPageObject
     private static String getNameOfList(String name_of_folder)
     {
         return CHOOSING_FOLDER_TPL.replace("{NAME_OF_FOLDER}", name_of_folder);
+    }
+
+    private static String getNameOfArticleTitle(String name_of_title)
+    {
+        return UNIVERSAL_TITLE.replace("{TITLE_OF_ARTICLE}", name_of_title);
     }
     /* TEMPLATES METHODS */
 
@@ -39,21 +48,52 @@ public class ArticlePageObject extends MainPageObject
     public String getArticleTitle()
     {
         WebElement title_element = waitForTitleElement();
-        return title_element.getAttribute("text");
+        if (Platform.getInstance().isAndroid()) {
+            return title_element.getAttribute("text");
+        } else {
+            return title_element.getAttribute("name");
+        }
+
+    }
+//для двух статей
+    public WebElement waitForTitleElementUniversal(String name_of_title)
+    {
+        String universal_title = getNameOfArticleTitle(name_of_title);
+        return this.waitForElementPresent(universal_title, "Cannot find article title on page!", 15);
+    }
+
+    public String getArticleTitleUniversal(String name_of_title)
+    {
+        WebElement title_element = waitForTitleElementUniversal(name_of_title);
+        if (Platform.getInstance().isAndroid()) {
+            return title_element.getAttribute("text");
+        } else {
+            return title_element.getAttribute("name");
+        }
+
     }
 
     public void waitForTitleOfArticle()
     {
-        this.waitForElementPresent(TITLE, "Cannot find article title on the page", 15);
+        this.waitForElementPresent(TITLE_FOR_APPIUM_ARTICLE, "Cannot find article title on the page", 15);
     }
+
 
     public void swipeToFooter()
     {
-        this.swipeUpToFindElement(
-                FOOTER_ELEMENT,
-                "Cannot find the end of article",
-                20
-        );
+        if (Platform.getInstance().isAndroid()){
+            this.swipeUpToFindElement(
+                    FOOTER_ELEMENT,
+                    "Cannot find the end of article",
+                    100
+            );
+        } else {
+            this.swipeUpTillElementAppear(
+                    FOOTER_ELEMENT,
+            "Cannot find the end of article",
+            100
+            );
+        }
     }
 
     public void addArticleToMyList(String name_of_folder)
@@ -144,6 +184,11 @@ public class ArticlePageObject extends MainPageObject
     public void assertThereIsTitleOnThePage()
     {
         this.assertElementPresent(LOCATOR_TITLE, "Cannot find title of article");
+    }
+
+    public void addArticlesToMySaved()
+    {
+        this.waitForElementAndClick(OPTIONS_ADD_TO_MY_LIST_BUTTON, "Cannot find option to add article to reading list", 5);
     }
 
 }
